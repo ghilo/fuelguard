@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(curl:*)",
+      "Bash(pg_isready:*)",
+      "Bash(docker run:*)",
+      "Bash(docker start:*)",
+      "Bash(docker exec:*)",
+      "Bash(npm run db:migrate:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9)",
+      "Bash(npm install:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1NDRiZDMyMC00ZWIyLTRiY2UtYjg3Yy1mZDZlN2VlODZhMjYiLCJlbWFpbCI6ImNpdGl6ZW5AdGVzdC5keiIsInJvbGUiOiJDSVRJWkVOIiwiaWF0IjoxNzY5NTA3MDI4LCJleHAiOjE3Njk1MDc5Mjh9.hobpl30blJuwo-RMbbvFD3jKi2DWr-tCr7lYxkfCFuo\")",
+      "Bash(python3:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(docker restart:*)",
+      "Bash(PGPASSWORD=fuelguard_secret psql:*)",
+      "Bash(npx ts-node:*)",
+      "WebFetch(domain:www.zupimages.net)"
+    ]
+  }
+}

@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  STATION_MANAGER
+  CITIZEN
+}
+
+enum VehicleType {
+  PRIVATE_CAR
+  TAXI
+  TRUCK
+  MOTORCYCLE
+  BUS
+  GOVERNMENT
+  OTHER
+}
+
+enum FuelType {
+  ESSENCE
+  GASOIL
+  GPL
+}
+
+enum TransactionStatus {
+  APPROVED
+  DENIED
+  PENDING
+}
+
+// Models
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  nationalId    String?   @unique
+  fullName      String
+  phone         String?
+  wilaya        String?   // User's wilaya/province
+  role          UserRole  @default(CITIZEN)
+  isActive      Boolean   @default(true)
+  isFlagged     Boolean   @default(false) // For warning status
+  flagReason    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  vehicles            Vehicle[]
+  households          Household[]
+  managedStations     StationManager[]
+  fuelTransactions    FuelTransaction[]     @relation("ProcessedBy")
+  gasTransactions     GasBottleTransaction[] @relation("GasProcessedBy")
+  refreshTokens       RefreshToken[]
+
+  @@index([email])
+  @@index([nationalId])
+  @@index([wilaya])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Station {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  address     String
+  wilaya      String    // Province/State in Algeria
+  commune     String    // Municipality
+  latitude    Float?
+  longitude   Float?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  managers          StationManager[]
+  fuelTransactions  FuelTransaction[]
+  gasTransactions   GasBottleTransaction[]
+
+  @@index([code])
+  @@index([wilaya])
+}
+
+model StationManager {
+  id        String   @id @default(uuid())
+  userId    String
+  stationId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  station   Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, stationId])
+  @@index([userId])
+  @@index([stationId])
+}
+
+model Vehicle {
+  id              String      @id @default(uuid())
+  ownerId         String
+  owner           User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  plateNumber     String      @unique
+  vehicleType     VehicleType
+  fuelType        FuelType
+  brand           String?
+  model           String?
+  carteGrisePhoto String?     // Path to uploaded photo
+  qrCodeData      String?     // Encrypted QR code content
+  isVerified      Boolean     @default(false)
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Custom fuel limits (override default rules)
+  customMaxLitersPerFill  Float?    // null = use default rule
+  customMaxFillsPerPeriod Int?      // null = use default rule
+  customPeriodHours       Int?      // null = use default rule
+  customLimitReason       String?   // Reason for custom limit (e.g., "Medical needs", "Business exception")
+
+  // Relations
+  transactions FuelTransaction[]
+
+  @@index([plateNumber])
+  @@index([ownerId])
+  @@index([vehicleType])
+}
+
+model FuelRule {
+  id              String      @id @default(uuid())
+  vehicleType     VehicleType
+  fuelType        FuelType?   // null means applies to all fuel types
+  wilaya          String?     // null means applies to all wilayas
+  maxFillsPerPeriod   Int
+  periodHours     Int         // e.g., 72 for 3 days
+  maxLitersPerFill    Float
+  exceptions      Json?       // Special cases as JSON
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([vehicleType, wilaya])
+  @@index([vehicleType])
+  @@index([wilaya])
+}
+
+model FuelTransaction {
+  id            String            @id @default(uuid())
+  vehicleId     String
+  vehicle       Vehicle           @relation(fields: [vehicleId], references: [id])
+  stationId     String
+  station       Station           @relation(fields: [stationId], references: [id])
+  processedById String
+  processedBy   User              @relation("ProcessedBy", fields: [processedById], references: [id])
+  liters        Float?
+  status        TransactionStatus
+  denialReason  String?
+  qrScannedAt   DateTime          @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime          @default(now())
+
+  @@index([vehicleId])
+  @@index([stationId])
+  @@index([processedById])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model Household {
+  id                  String    @id @default(uuid())
+  ownerId             String
+  owner               User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  nationalId          String    @unique  // Head of household national ID
+  fullName            String
+  address             String
+  wilaya              String
+  commune             String
+  memberCount         Int       @default(1)
+  residenceProofUrl   String?   // Facture de residence
+  qrCodeData          String?
+  isVerified          Boolean   @default(false)
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  transactions GasBottleTransaction[]
+
+  @@index([nationalId])
+  @@index([ownerId])
+  @@index([wilaya])
+}
+
+model GasBottleRule {
+  id                  String   @id @default(uuid())
+  name                String   // e.g., "Standard Household"
+  maxBottlesPerPeriod Int
+  periodDays          Int      // e.g., 30 for monthly
+  minMemberCount      Int      @default(1)
+  maxMemberCount      Int?
+  bottleSize          Float    @default(13)  // kg, standard is 13kg in Algeria
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model GasBottleTransaction {
+  id            String            @id @default(uuid())
+  householdId   String
+  household     Household         @relation(fields: [householdId], references: [id])
+  stationId     String
+  station       Station           @relation(fields: [stationId], references: [id])
+  processedById String
+  processedBy   User              @relation("GasProcessedBy", fields: [processedById], references: [id])
+  quantity      Int               // Number of bottles
+  bottleSize    Float             @default(13)
+  exchangeType  String            @default("NEW") // NEW, EXCHANGE (empty for full)
+  status        TransactionStatus
+  denialReason  String?
+  createdAt     DateTime          @default(now())
+
+  @@index([householdId])
+  @@index([stationId])
+  @@index([createdAt])
+}
+
+// QR Codes with expiration
+enum QREntityType {
+  VEHICLE
+  HOUSEHOLD
+}
+
+model QRCode {
+  id          String       @id @default(uuid())
+  entityType  QREntityType
+  entityId    String
+  codeHash    String       @unique
+  codeData    String       // Encrypted content
+  expiresAt   DateTime
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  @@index([entityType, entityId])
+  @@index([codeHash])
+  @@index([expiresAt])
+}
+
+// Blacklist for fraud prevention
+model Blacklist {
+  id          String    @id @default(uuid())
+  nationalId  String?
+  plateNumber String?
+  reason      String
+  severity    String    @default("WARNING") // WARNING, BLOCKED
+  addedById   String?
+  notes       String?
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime? // null = permanent
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([nationalId])
+  @@index([plateNumber])
+  @@index([isActive])
+}
+
+// Audit Logs for tracking all actions
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String   // LOGIN, LOGOUT, SCAN, APPROVE, DENY, CREATE_VEHICLE, etc.
+  entityType  String?  // USER, VEHICLE, STATION, TRANSACTION, etc.
+  entityId    String?
+  details     Json?    // Additional context
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
