@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { body } from 'express-validator';
 import * as authService from '../services/auth.service.js';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import prisma from '../config/database.js';
 
 export const registerValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
@@ -108,7 +109,6 @@ export async function me(req: AuthenticatedRequest, res: Response): Promise<void
       return;
     }
 
-    const { default: prisma } = await import('../config/database.js');
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
       select: {

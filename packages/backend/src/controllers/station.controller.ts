@@ -109,7 +109,7 @@ export async function createStation(req: AuthenticatedRequest, res: Response): P
 
 export async function getStation(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const station = await prisma.station.findUnique({
       where: { id },
@@ -149,7 +149,7 @@ export async function getStation(req: AuthenticatedRequest, res: Response): Prom
 
 export async function updateStation(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, address, wilaya, commune, latitude, longitude, isActive } = req.body;
 
     const station = await prisma.station.update({
@@ -173,7 +173,7 @@ export async function updateStation(req: AuthenticatedRequest, res: Response): P
 
 export async function addManager(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id: stationId } = req.params;
+    const stationId = req.params.id as string;
     const { email } = req.body;
 
     // Find user by email
@@ -220,7 +220,8 @@ export async function addManager(req: AuthenticatedRequest, res: Response): Prom
 
 export async function removeManager(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id: stationId, managerId } = req.params;
+    const stationId = req.params.id as string;
+    const managerId = req.params.managerId as string;
 
     await prisma.stationManager.updateMany({
       where: { userId: managerId, stationId },
@@ -287,7 +288,7 @@ export async function getStationTransactions(req: AuthenticatedRequest, res: Res
       return;
     }
 
-    const stationId = req.params.id || stationManager?.stationId;
+    const stationId = (req.params.id as string) || stationManager?.stationId;
     if (!stationId) {
       res.status(400).json({ error: 'Station ID required' });
       return;

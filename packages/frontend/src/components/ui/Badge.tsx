@@ -1,12 +1,14 @@
 import { clsx } from 'clsx';
+import type { CSSProperties } from 'react';
 
-interface BadgeProps {
+export interface BadgeProps {
   variant?: 'primary' | 'success' | 'danger' | 'warning' | 'gray';
   children: React.ReactNode;
   className?: string;
+  style?: CSSProperties;
 }
 
-export default function Badge({ variant = 'primary', children, className }: BadgeProps) {
+export default function Badge({ variant = 'primary', children, className, style }: BadgeProps) {
   const variants = {
     primary: 'bg-primary-50 text-primary-600',
     success: 'bg-success-50 text-success-600',
@@ -22,6 +24,7 @@ export default function Badge({ variant = 'primary', children, className }: Badg
         variants[variant],
         className
       )}
+      style={style}
     >
       {children}
     </span>

@@ -172,7 +172,7 @@ export async function getVehicle(req: AuthenticatedRequest, res: Response): Prom
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const vehicle = await prisma.vehicle.findFirst({
       where: {
@@ -215,7 +215,7 @@ export async function getVehicleQRCode(req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const vehicle = await prisma.vehicle.findFirst({
       where: {
@@ -273,7 +273,7 @@ export async function deleteVehicle(req: AuthenticatedRequest, res: Response): P
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const vehicle = await prisma.vehicle.findFirst({
       where: {

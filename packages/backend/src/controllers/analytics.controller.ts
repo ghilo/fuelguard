@@ -78,7 +78,7 @@ export async function getFuelRules(req: AuthenticatedRequest, res: Response): Pr
 
 export async function updateFuelRule(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { maxFillsPerPeriod, periodHours, maxLitersPerFill, isActive, exceptions } = req.body;
 
     const rule = await prisma.fuelRule.update({
@@ -152,7 +152,7 @@ export async function listUsers(req: AuthenticatedRequest, res: Response): Promi
 
 export async function updateUser(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { isActive, role } = req.body;
 
     const user = await prisma.user.update({
@@ -178,7 +178,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response): Prom
 
 export async function verifyVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { isVerified } = req.body;
 
     const vehicle = await prisma.vehicle.update({
@@ -202,7 +202,7 @@ export async function verifyVehicle(req: AuthenticatedRequest, res: Response): P
 
 export async function updateVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const {
       plateNumber,
       vehicleType,
@@ -262,7 +262,7 @@ export async function updateVehicle(req: AuthenticatedRequest, res: Response): P
 
 export async function getVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const vehicle = await prisma.vehicle.findUnique({
       where: { id },
@@ -303,7 +303,7 @@ export async function getVehicle(req: AuthenticatedRequest, res: Response): Prom
 
 export async function verifyHousehold(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { isVerified } = req.body;
 
     const household = await prisma.household.update({

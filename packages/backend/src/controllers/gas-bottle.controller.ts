@@ -114,7 +114,7 @@ export async function getHouseholdQRCode(req: AuthenticatedRequest, res: Respons
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const household = await prisma.household.findFirst({
       where: {

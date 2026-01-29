@@ -20,7 +20,8 @@ export type AuditAction =
   | 'REMOVE_BLACKLIST'
   | 'UPDATE_RULE'
   | 'GENERATE_QR'
-  | 'EXPORT_REPORT';
+  | 'EXPORT_REPORT'
+  | 'EXPORT';
 
 export type EntityType =
   | 'USER'
@@ -29,14 +30,17 @@ export type EntityType =
   | 'STATION'
   | 'TRANSACTION'
   | 'BLACKLIST'
-  | 'RULE';
+  | 'RULE'
+  | 'FUEL_TRANSACTION'
+  | 'GAS_BOTTLE_TRANSACTION'
+  | 'FRAUD_ATTEMPT';
 
 interface AuditLogParams {
   userId?: string;
   action: AuditAction;
   entityType?: EntityType;
   entityId?: string;
-  details?: Record<string, unknown>;
+  details?: object;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -49,7 +53,7 @@ export async function logAudit(params: AuditLogParams): Promise<void> {
         action: params.action,
         entityType: params.entityType,
         entityId: params.entityId,
-        details: params.details,
+        details: params.details as object | undefined,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
       },

@@ -64,7 +64,7 @@ export async function removeFromBlacklist(req: AuthenticatedRequest, res: Respon
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     await blacklistService.removeFromBlacklist(id);
 
@@ -108,11 +108,12 @@ export async function getBlacklist(req: AuthenticatedRequest, res: Response): Pr
 
 export async function checkBlacklist(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const { nationalId, plateNumber } = req.query;
+    const nationalId = qString(req.query.nationalId);
+    const plateNumber = qString(req.query.plateNumber);
 
     const result = await blacklistService.checkBlacklist(
-      nationalId as string,
-      plateNumber as string
+      nationalId,
+      plateNumber
     );
 
     res.json(result);
@@ -128,7 +129,7 @@ export async function flagUser(req: AuthenticatedRequest, res: Response): Promis
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { reason } = req.body;
 
     if (!reason) {
@@ -159,7 +160,7 @@ export async function unflagUser(req: AuthenticatedRequest, res: Response): Prom
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const user = await blacklistService.unflagUser(id);
 

@@ -19,7 +19,11 @@
       "Bash(docker restart:*)",
       "Bash(PGPASSWORD=fuelguard_secret psql:*)",
       "Bash(npx ts-node:*)",
-      "WebFetch(domain:www.zupimages.net)"
+      "WebFetch(domain:www.zupimages.net)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx tsx:*)"
     ]
   }
 }
