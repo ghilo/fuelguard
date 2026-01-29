@@ -1,3 +1,4 @@
+import { qString } from "../utils/query";
 import type { Response } from 'express';
 import { body, param, query } from 'express-validator';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
@@ -19,11 +20,11 @@ export const addManagerValidation = [
 
 export async function listStations(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const page = parseInt(qString(req.query.page) ?? "1");
+    const limit = parseInt(qString(req.query.limit) ?? "20");
     const skip = (page - 1) * limit;
-    const search = req.query.search as string;
-    const wilaya = req.query.wilaya as string;
+    const search = qString(req.query.search);
+    const wilaya = qString(req.query.wilaya);
 
     const where = {
       isActive: true,

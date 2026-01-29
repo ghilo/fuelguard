@@ -1,3 +1,4 @@
+import { qString } from "../utils/query";
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import * as exportService from '../services/export.service.js';
@@ -19,10 +20,10 @@ export async function exportFuelTransactions(req: AuthenticatedRequest, res: Res
     const { startDate, endDate, stationId, status } = req.query;
 
     const csv = await exportService.exportFuelTransactionsCSV({
-      startDate: parseDate(startDate as string),
-      endDate: parseDate(endDate as string),
-      stationId: stationId as string,
-      status: status as 'APPROVED' | 'DENIED',
+    startDate: parseDate(startDate as string),
+    endDate: parseDate(endDate as string),
+    stationId: stationId as string,
+    status: status as 'APPROVED' | 'DENIED',
     });
 
     await auditService.logAudit({

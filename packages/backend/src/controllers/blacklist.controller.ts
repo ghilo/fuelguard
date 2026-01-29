@@ -1,3 +1,4 @@
+import { qString } from "../utils/query";
 import type { Response } from 'express';
 import { body, query } from 'express-validator';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
@@ -83,11 +84,13 @@ export async function removeFromBlacklist(req: AuthenticatedRequest, res: Respon
 
 export async function getBlacklist(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const search = req.query.search as string;
-    const severity = req.query.severity as string;
-    const isActive = req.query.isActive !== 'false';
+    const page = parseInt(qString(req.query.page) ?? "1");
+    const limit = parseInt(qString(req.query.limit) ?? "20");
+
+    const search = qString(req.query.search);
+    const severity = qString(req.query.severity);
+
+    const isActive = qString(req.query.isActive) !== "false";
 
     const result = await blacklistService.getBlacklistEntries({
       search,

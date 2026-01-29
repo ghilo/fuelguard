@@ -1,3 +1,4 @@
+import { qString } from "../utils/query";
 import type { Response } from 'express';
 import { body, param } from 'express-validator';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
@@ -305,8 +306,8 @@ export async function getTransactions(req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const page = parseInt(qString(req.query.page) ?? "1");
+    const limit = parseInt(qString(req.query.limit) ?? "20");
     const skip = (page - 1) * limit;
 
     const vehicles = await prisma.vehicle.findMany({
